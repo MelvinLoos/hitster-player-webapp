@@ -50,7 +50,6 @@ export default function App() {
   useRegisterSW({ immediate: true });
 
   // ── 1. Auth token + track ID from URL ──────────────────────────────────────
-  // ── 1. Auth token + track ID from URL ──────────────────────────────────────
   useEffect(() => {
     const hash = window.location.hash;
     const params = new URLSearchParams(window.location.search);
@@ -75,7 +74,6 @@ export default function App() {
         if (data.access_token) {
           window.localStorage.setItem('spotify_hitster_token', data.access_token);
           setToken(data.access_token);
-          window.history.replaceState('', document.title, window.location.pathname);
         } else {
           setError("Auth failed: " + (data.error_description || data.error));
         }
@@ -85,11 +83,19 @@ export default function App() {
     };
 
     if (code) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('code');
+      window.history.replaceState({}, document.title, url.toString());
+
       exchangeToken(code);
     } else if (hash && hash.includes('access_token')) {
       _token = new URLSearchParams(hash.replace('#', '?')).get('access_token');
       window.localStorage.setItem('spotify_hitster_token', _token);
-      window.history.replaceState('', document.title, window.location.pathname + window.location.search);
+
+      const url = new URL(window.location.href);
+      url.hash = '';
+      window.history.replaceState({}, document.title, url.toString());
+
       setToken(_token);
     } else {
       setToken(_token);
