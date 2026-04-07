@@ -165,18 +165,29 @@ export default function App() {
       const res = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
         headers: { Authorization: `Bearer ${currentToken}` },
       });
+
       if (res.status === 401) {
         window.localStorage.removeItem('spotify_hitster_token');
         setToken(null);
         setError('Session expired. Please reconnect Spotify.');
         return;
       }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      // Look here! We now extract the exact error message from Spotify
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${res.status}`);
+      }
+
       const data = await res.json();
       setTrackInfo(data);
       togglePlayback(true, id, currentToken);
-    } catch {
-      setError('Failed to fetch track info. Check your connection and try again.');
+    } catch (err) {
+      if (err.message.includes('403')) {
+        setError('Spotify blocked access (403). Is this user added to your Spotify Developer Dashboard whitelist?');
+      } else {
+        setError(`Failed to fetch track: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }

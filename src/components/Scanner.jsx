@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, Link2, X, ArrowRight, QrCode } from 'lucide-react';
 
 export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
-  const [mode, setMode] = useState('idle'); // 'idle' | 'scanning' | 'manual'
+  const [mode, setMode] = useState('idle');
   const [manualUrl, setManualUrl] = useState('');
+  const scannerRef = useRef(null);
 
   useEffect(() => {
     if (mode !== 'scanning') return;
 
-    // We use the headless Html5Qrcode class instead of the clunky UI wrapper
-    const html5QrCode = new Html5Qrcode('qr-reader');
     let isMounted = true;
+    const html5QrCode = new Html5Qrcode('qr-reader');
 
     html5QrCode.start(
       { facingMode: 'environment' },
       {
-        fps: 15, // Slightly higher FPS for smoother native feel
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
+        fps: 15,
+        // By removing qrbox, the library scans the entire video feed!
+        // This makes scanning drastically faster and more forgiving.
       },
       (decodedText) => {
         const id = extractSpotifyId(decodedText);
@@ -32,21 +32,23 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
             }).catch(console.error);
           }
         } else {
-          onError('No valid Spotify URL found on this QR code.');
+          onError('No valid Spotify track URL found on this QR code.');
         }
       },
-      (errorMessage) => {
-        // We ignore background scanning noise/errors
+      () => { /* ignore background scan noise */ }
+    ).catch(() => {
+      if (isMounted) {
+        onError('Failed to start camera. Please check your browser permissions.');
+        setMode('idle');
       }
-    ).catch((err) => {
-      onError('Failed to start camera. Please check your browser permissions.');
-      setMode('idle');
     });
+
+    scannerRef.current = html5QrCode;
 
     return () => {
       isMounted = false;
       if (html5QrCode.isScanning) {
-        html5QrCode.stop().catch(console.error);
+        html5QrCode.stop().catch(() => { });
       }
     };
   }, [mode, extractSpotifyId, onTrackFound, onError]);
@@ -59,11 +61,10 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
       setMode('idle');
       onTrackFound(id);
     } else {
-      onError('Invalid Spotify track URL. It should look like: https://open.spotify.com/track/…');
+      onError('Invalid Spotify track URL. It should look like: https://open.spotify.com/track/123...');
     }
   };
 
-  // --- SCANNING UI ---
   if (mode === 'scanning') {
     return (
       <div className="flex flex-col items-center w-full animate-fade-in">
@@ -72,7 +73,7 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
         {/* Sleek Native-App Camera Container */}
         <div className="relative w-full max-w-sm aspect-[4/5] bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 mb-6">
           {/* Video Feed */}
-          <div id="qr-reader" className="w-full h-full"></div>
+          <div id="qr-reader" className="w-full h-full [&>video]:w-full [&>video]:h-full [&>video]:object-cover"></div>
 
           {/* Native Reticle Overlay */}
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none bg-black/20">
@@ -93,33 +94,37 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
           </div>
         </div>
 
-        <button onClick={() => setMode('idle')} className="btn-secondary rounded-full py-4 max-w-sm w-full">
+        <button onClick={() => setMode('idle')} className="btn-secondary rounded-full max-w-sm">
           <X size={20} /> Cancel Scan
         </button>
       </div>
     );
   }
 
-  // --- DEFAULT UI ---
   return (
-    <div className="flex flex-col items-center text-center py-2 animate-fade-in">
-      <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border border-slate-700 shadow-lg relative overflow-hidden">
-        <div className="absolute inset-0 bg-emerald-500/10 animate-pulse"></div>
-        <Camera size={36} className="text-emerald-400 relative z-10" />
+    <div className="flex flex-col items-center text-center py-2">
+      <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border border-slate-700 shadow-lg">
+        <Camera size={36} className="text-emerald-400" />
       </div>
 
       <h2 className="text-xl font-bold text-white mb-1">Ready to Play!</h2>
       <p className="text-slate-400 text-sm mb-8">Scan the QR code on your Hitster card to load a song.</p>
 
       <div className="w-full flex flex-col gap-3">
-        <button onClick={() => setMode('scanning')} className="btn-primary rounded-full shadow-emerald-500/20">
+        <button onClick={() => setMode('scanning')} className="btn-primary">
           <Camera size={20} />
           Scan Hitster Card
         </button>
 
-        <div className="relative my-2">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800" /></div>
-          <div className="relative flex justify-center"><span className="px-3 bg-slate-900 text-slate-500 text-xs font-medium uppercase tracking-wider">or paste URL</span></div>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-800" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 bg-slate-900 text-slate-600 text-xs font-medium rounded-full border border-slate-800">
+              or paste URL manually
+            </span>
+          </div>
         </div>
 
         {mode === 'manual' ? (
@@ -127,8 +132,8 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
             <input
               type="url"
               autoFocus
-              className="input rounded-2xl"
-              placeholder="https://open.spotify.com/track/…"
+              className="input"
+              placeholder="https://open.spotify.com/track/..."
               value={manualUrl}
               onChange={(e) => setManualUrl(e.target.value)}
             />
@@ -142,9 +147,9 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
             </div>
           </form>
         ) : (
-          <button onClick={() => setMode('manual')} className="btn-secondary rounded-full py-4 text-slate-300">
+          <button onClick={() => setMode('manual')} className="btn-ghost">
             <Link2 size={18} />
-            Enter Link Manually
+            Paste Spotify URL
           </button>
         )}
       </div>
