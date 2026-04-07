@@ -3,7 +3,10 @@
 @tailwind utilities;
 
 @layer base {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
@@ -54,33 +57,39 @@
   }
 }
 
-/* QR Scanner overrides */
+/* Custom Native Scanner Animations & Adjustments */
+@keyframes scanline {
+  0% {
+    transform: translateY(0px);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(220px);
+    opacity: 0;
+  }
+}
+
+.animate-scan-line {
+  animation: scanline 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 #qr-reader {
   border: none !important;
-  padding: 0 !important;
 }
-#qr-reader__scan_region {
-  background: transparent !important;
-}
-#qr-reader__dashboard {
-  padding: 8px !important;
-  background: rgba(15, 23, 42, 0.8) !important;
-}
-#qr-reader__dashboard_section_csr button {
-  background: #10b981 !important;
-  color: #0f172a !important;
-  border: none !important;
-  padding: 8px 16px !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-}
-#qr-reader__camera_permission_button {
-  background: #10b981 !important;
-  color: #0f172a !important;
-  border: none !important;
-  padding: 8px 16px !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
+
+#qr-reader video {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 1.5rem !important;
+  /* matches rounded-3xl */
 }
