@@ -191,7 +191,6 @@ export default function App() {
     let targetDeviceId = null;
 
     try {
-      // 1. If we want to play, first try to find an available device to wake up
       if (play) {
         const devicesRes = await fetch('https://api.spotify.com/v1/me/player/devices', {
           headers: { Authorization: `Bearer ${activeToken}` },
@@ -200,14 +199,33 @@ export default function App() {
         if (devicesRes.ok) {
           const { devices } = await devicesRes.json();
           if (devices && devices.length > 0) {
-            // Prefer an already active device, otherwise just grab the first available one (like your phone)
-            const activeDevice = devices.find(d => d.is_active) || devices[0];
-            targetDeviceId = activeDevice.id;
+
+            // 1. Is there a device currently playing music?
+            let selectedDevice = devices.find(d => d.is_active);
+
+            // 2. If nothing is actively playing, try to match the device type!
+            if (!selectedDevice) {
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+              if (isMobile) {
+                // Find a smartphone
+                selectedDevice = devices.find(d => d.type.toLowerCase() === 'smartphone');
+              } else {
+                // Find a computer
+                selectedDevice = devices.find(d => d.type.toLowerCase() === 'computer');
+              }
+            }
+
+            // 3. Fallback: Just grab the first available device
+            if (!selectedDevice) {
+              selectedDevice = devices[0];
+            }
+
+            targetDeviceId = selectedDevice.id;
           }
         }
       }
 
-      // 2. Build the playback URL, appending the device ID if we found one
       const endpoint = play ? 'play' : 'pause';
       let url = `https://api.spotify.com/v1/me/player/${endpoint}`;
       if (play && targetDeviceId) {
@@ -216,7 +234,6 @@ export default function App() {
 
       const body = play ? JSON.stringify({ uris: [`spotify:track:${activeTrack}`] }) : null;
 
-      // 3. Send the command
       const res = await fetch(url, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${activeToken}`, 'Content-Type': 'application/json' },
@@ -224,11 +241,11 @@ export default function App() {
       });
 
       if (res.status === 404) {
-        setError('No Spotify devices found at all. Please open the Spotify app on your phone or computer to wake it up, then try again.');
+        setError('No active Spotify device found. Open Spotify on any device, start playing anything, then try again.');
         return;
       }
       if (res.status === 403) {
-        setError('Spotify Premium is required to control playback, or the targeted device is restricted.');
+        setError('Spotify Premium is required to control playback.');
         return;
       }
       if (res.ok || res.status === 204) {
