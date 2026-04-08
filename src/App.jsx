@@ -8,7 +8,7 @@ import { Music, Download, AlertCircle } from 'lucide-react';
 // ─── CONFIGURATION ────────────────────────────────────────────────────────────
 // Set your Spotify Client ID here (from https://developer.spotify.com/dashboard)
 // Add BOTH of these as valid Redirect URIs in your Spotify app settings:
-//   - https://hitster.looselycoupled.nl
+//   - https://groovageddon.nl
 //   - https://<your-netlify-subdomain>.netlify.app
 const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID ?? 'YOUR_SPOTIFY_CLIENT_ID';
 const REDIRECT_URI = window.location.origin;
@@ -54,7 +54,7 @@ export default function App() {
     const hash = window.location.hash;
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    let _token = window.localStorage.getItem('spotify_hitster_token');
+    let _token = window.localStorage.getItem('spotify_groovageddon_token');
 
     const exchangeToken = async (authCode) => {
       const codeVerifier = window.localStorage.getItem('code_verifier');
@@ -72,7 +72,7 @@ export default function App() {
         });
         const data = await response.json();
         if (data.access_token) {
-          window.localStorage.setItem('spotify_hitster_token', data.access_token);
+          window.localStorage.setItem('spotify_groovageddon_token', data.access_token);
           setToken(data.access_token);
         } else {
           setError("Auth failed: " + (data.error_description || data.error));
@@ -90,7 +90,7 @@ export default function App() {
       exchangeToken(code);
     } else if (hash && hash.includes('access_token')) {
       _token = new URLSearchParams(hash.replace('#', '?')).get('access_token');
-      window.localStorage.setItem('spotify_hitster_token', _token);
+      window.localStorage.setItem('spotify_groovageddon_token', _token);
 
       const url = new URL(window.location.href);
       url.hash = '';
@@ -149,7 +149,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    window.localStorage.removeItem('spotify_hitster_token');
+    window.localStorage.removeItem('spotify_groovageddon_token');
     setToken(null);
     setTrackId(null);
     setTrackInfo(null);
@@ -167,7 +167,7 @@ export default function App() {
       });
 
       if (res.status === 401) {
-        window.localStorage.removeItem('spotify_hitster_token');
+        window.localStorage.removeItem('spotify_groovageddon_token');
         setToken(null);
         setError('Session expired. Please reconnect Spotify.');
         return;
@@ -302,7 +302,7 @@ export default function App() {
               <Music size={20} className="text-emerald-400" />
             </div>
             <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              HITSTER
+              GROOVAGEDDON
             </h1>
           </div>
           <p className="text-slate-500 text-sm font-medium">Blind Test Player</p>
@@ -315,7 +315,7 @@ export default function App() {
             className="w-full mb-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-semibold py-3 px-4 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2"
           >
             <Download size={16} />
-            Install Hitster as an app
+            Install Groovageddon as an app
           </button>
         )}
 

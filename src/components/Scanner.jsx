@@ -108,12 +108,12 @@ export default function Scanner({ extractSpotifyId, onTrackFound, onError }) {
       </div>
 
       <h2 className="text-xl font-bold text-white mb-1">Ready to Play!</h2>
-      <p className="text-slate-400 text-sm mb-8">Scan the QR code on your Hitster card to load a song.</p>
+      <p className="text-slate-400 text-sm mb-8">Scan the QR code on your Groovageddon card to load a song.</p>
 
       <div className="w-full flex flex-col gap-3">
         <button onClick={() => setMode('scanning')} className="btn-primary">
           <Camera size={20} />
-          Scan Hitster Card
+          Scan Groovageddon Card
         </button>
 
         <div className="relative">

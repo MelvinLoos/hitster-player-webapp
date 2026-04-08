@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'Hitster Player',
-        short_name: 'Hitster',
-        description: 'Blind test player for the Hitster card game — scan a card and play via Spotify.',
+        name: 'Groovageddon Player',
+        short_name: 'Groovageddon',
+        description: 'Blind test player for the Groovageddon card game — scan a card and play via Spotify.',
         theme_color: '#10b981',
         background_color: '#0f172a',
         display: 'standalone',

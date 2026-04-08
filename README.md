@@ -1,10 +1,10 @@
-# Hitster Player 🎵
+# Groovageddon Player 🎵
 
-A Progressive Web App (PWA) for playing [Hitster](https://hitstergame.com) — scan the QR code on a card, play the song via Spotify, and reveal (or keep hidden) the title and year.
+A Progressive Web App (PWA) for playing [Groovageddon](https://groovageddon.nl) — scan the QR code on a card, play the song via Spotify, and reveal (or keep hidden) the title and year.
 
 ## Features
 
-- 📷 **QR scanner** — scan Hitster cards directly with your phone camera
+- 📷 **QR scanner** — scan Groovageddon cards directly with your phone camera
 - 🎵 **Spotify playback control** — play/pause via the Spotify Web API
 - 🕵️ **Reveal/hide** — keep the mystery alive or reveal the answer instantly
 - 📲 **Installable PWA** — works offline, installs on your home screen
@@ -16,8 +16,8 @@ A Progressive Web App (PWA) for playing [Hitster](https://hitstergame.com) — s
 
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create an app.
 2. Add **both** of these as **Redirect URIs** in your Spotify app settings:
-   - `https://hitster.looselycoupled.nl`
-   - `https://<your-netlify-subdomain>.netlify.app`
+   - `https://groovageddon.nl`
+   - `https://groovageddon.netlify.app`
    - `http://localhost:5173` (for local development)
 3. Copy your **Client ID**.
 
@@ -62,12 +62,12 @@ netlify deploy --prod --dir=dist
 4. Add an environment variable in **Site settings → Environment variables**:
    - Key: `VITE_SPOTIFY_CLIENT_ID`
    - Value: your Spotify Client ID.
-5. **Add your custom domain** `hitster.looselycoupled.nl` under **Domain management** and point your DNS CNAME to the Netlify-generated domain.
+5. **Add your custom domain** `groovageddon.nl` under **Domain management** and point your DNS CNAME to the Netlify-generated domain.
 
 ## Project Structure
 
 ```
-hitster-web-app/
+groovageddon-web-app/
 ├── public/
 │   └── favicon.svg
 ├── src/

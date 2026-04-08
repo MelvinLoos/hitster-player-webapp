@@ -28,9 +28,9 @@ export default function Login({ onLogin }) {
         ))}
       </div>
 
-      <h2 className="text-xl font-bold text-white mb-2">Welcome to Hitster</h2>
+      <h2 className="text-xl font-bold text-white mb-2">Welcome to Groovageddon</h2>
       <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-xs">
-        Connect your Spotify account to scan Hitster cards and control music playback right from this app.
+        Connect your Spotify account to scan Groovageddon cards and control music playback right from this app.
       </p>
 
       <button onClick={onLogin} className="btn-primary">
